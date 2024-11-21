@@ -1,0 +1,6 @@
+{
+  "eslint.codeActionsOnSave.rules": null,
+  "eslint.enable": true,
+  "eslint.format.enable": false,
+  "eslint.notebooks.rules.customizations": []
+}
