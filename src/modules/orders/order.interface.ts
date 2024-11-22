@@ -34,8 +34,8 @@ export const orderSchema = new Schema<IOrder>(
     },
     totalPrice: {
       type: Number,
-      required: [true, 'Total price is required'],
-      min: [0, 'Total price must be a positive number'],
+      // required: [true, 'Total price is required'],
+      // min: [0, 'Total price must be a positive number'],
     },
   },
   { timestamps: true, versionKey: false },
@@ -50,14 +50,17 @@ orderSchema.pre('save', async function (next) {
       return next(new Error('Product not found'));
     }
 
+    // ! calculatePrice Unuse Support sesion instuctor sister command Date: 11/22/24 11:03 PM
+    // if (product.price * this.quantity !== this.totalPrice) {
+    //   return next(
+    //     new Error(
+    //       `Price mismatch: Expected total price is ${product.price * this.quantity}, but received ${this.totalPrice}`,
+    //     ),
+    //   );
+    // }
+
     // calculatePrice
-    if (product.price * this.quantity !== this.totalPrice) {
-      return next(
-        new Error(
-          `Price mismatch: Expected total price is ${product.price * this.quantity}, but received ${this.totalPrice}`,
-        ),
-      );
-    }
+    this.totalPrice = product.price * this.quantity;
 
     // enough stock is available
     if (product.quantity < this.quantity) {
