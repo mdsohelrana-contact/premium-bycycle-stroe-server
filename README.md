@@ -36,30 +36,30 @@ A Bicycle Store application built with **TypeScript** , **Express.js** , and **M
   GET /api/products
 ```
 
-#### Get a Specific Bicycle
+#### Get a Specific Bicycle (GET)
 
 ```http
-  GET /api/products/:productId
+   /api/products/:productId
 ```
 
 | Parameter   | Type     | Description                       |
 | :---------- | :------- | :-------------------------------- |
 | `productId` | `string` | **Required**. Id of item to fetch |
 
-#### Update a Bicycle
+#### Update a Bicycle (PUT)
 
 ```http
-  PUT /api/products/:productId
+   /api/products/:productId
 ```
 
 | Parameter   | Type     | Description                       |
 | :---------- | :------- | :-------------------------------- |
 | `productId` | `string` | **Required**. Id of item to fetch |
 
-#### Delete a Bicycle
+#### Delete a Bicycle (DELETE)
 
 ```http
-  DELETE /api/products/:productId
+   /api/products/:productId
 ```
 
 | Parameter   | Type     | Description                       |
@@ -68,16 +68,16 @@ A Bicycle Store application built with **TypeScript** , **Express.js** , and **M
 
 ## Orders
 
-#### Order a Bicycle
+#### Order a Bicycle (POST)
 
 ```http
-  POST /api/orders
+   /api/orders
 ```
 
-#### Calculate Revenue from Orders (Aggregation)
+#### Calculate Revenue from Orders (Aggregation) (GET)
 
 ```http
-  GET /api/orders/revenue
+   /api/orders/revenue
 ```
 
 ## Server Live URL
