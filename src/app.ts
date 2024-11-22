@@ -31,7 +31,7 @@ app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
   const error = err as IError;
 
   res.status(error.status || 500).json({
-    message: 'Validation failed',
+    message: error.message,
     success: false,
     error: {
       name: error.name,

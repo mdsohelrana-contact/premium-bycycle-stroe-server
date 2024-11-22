@@ -4,8 +4,20 @@ import { IBicycle } from './product.interface';
 
 // allProducts use productServices.postProductData
 const allProducts = async (req: Request, res: Response, next: NextFunction) => {
+  // i understant this tnan typescript hahahaha
+  const searchTerm = req.query.searchTerm as string;
+
   try {
-    const result = await productServices.getAllProducts();
+    const result = await productServices.getAllProducts(searchTerm);
+
+    if (result.length === 0) {
+      res.status(404).json({
+        message: 'No bicycles found',
+        status: false,
+        data: [],
+      });
+    }
+
     res.status(200).json({
       message: 'Bicycles retrieved successfully',
       status: true,

@@ -1,8 +1,26 @@
 import { BicycleModel, IBicycle } from './product.interface';
 
 // getAllProducts service
-const getAllProducts = async () => {
-  const allProducts = await BicycleModel.find();
+const getAllProducts = async (searchTerm: string | undefined) => {
+  let filter = {};
+
+  if (searchTerm && searchTerm.trim() !== '') {
+    filter = {
+      $or: [
+        {
+          name: new RegExp(searchTerm, 'i'),
+        },
+        {
+          brand: new RegExp(searchTerm, 'i'),
+        },
+        {
+          type: new RegExp(searchTerm, 'i'),
+        },
+      ],
+    };
+  }
+
+  const allProducts = await BicycleModel.find(filter);
 
   return allProducts;
 };

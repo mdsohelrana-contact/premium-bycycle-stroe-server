@@ -48,7 +48,6 @@ export const bicicleSchema = new Schema<IBicycle>(
     description: {
       type: String,
       required: [true, 'The description is required.'],
-      trim: true,
     },
     quantity: {
       type: Number,

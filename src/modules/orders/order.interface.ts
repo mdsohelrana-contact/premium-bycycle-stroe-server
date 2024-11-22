@@ -11,8 +11,8 @@ export interface IOrder extends Document {
 
 // simple email validaation
 const validateEmail = (email: string) => {
-  const re = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-  return re.test(email);
+  const emailSyntax = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
+  return emailSyntax.test(email);
 };
 
 // Define Order Schema
@@ -75,7 +75,7 @@ orderSchema.pre('save', async function (next) {
     await product.save();
     next();
   } catch (error) {
-    console.log('error:', error);
+    return error;
   }
 });
 
