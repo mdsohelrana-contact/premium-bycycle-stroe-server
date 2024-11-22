@@ -1,7 +1,8 @@
-import { model, Schema, Types } from 'mongoose';
+import { Document, model, Schema, Types } from 'mongoose';
+import { BicycleModel } from '../products/product.interface';
 
 // Define order interface
-export interface IOrder {
+export interface IOrder extends Document {
   email: string;
   product: Types.ObjectId;
   quantity: number;
@@ -20,12 +21,10 @@ export const orderSchema = new Schema<IOrder>(
     email: {
       type: String,
       required: [true, 'Email address is required'],
-      unique: true,
       validate: [validateEmail, 'Please fill a valid email address'],
     },
     product: {
       type: Schema.Types.ObjectId,
-      ref: 'products',
       required: [true, 'Product reference is required'],
     },
     quantity: {
@@ -39,8 +38,46 @@ export const orderSchema = new Schema<IOrder>(
       min: [0, 'Total price must be a positive number'],
     },
   },
-  { timestamps: true },
+  { timestamps: true, versionKey: false },
 );
+
+// Pre-save hook to validate stock and update inventory
+orderSchema.pre('save', async function (next) {
+  try {
+    // Fetch the product
+    const product = await BicycleModel.findById(this.product);
+    if (!product) {
+      return next(new Error('Product not found'));
+    }
+
+    // calculatePrice
+    if (product.price * this.quantity !== this.totalPrice) {
+      return next(
+        new Error(
+          `Price mismatch: Expected total price is ${product.price * this.quantity}, but received ${this.totalPrice}`,
+        ),
+      );
+    }
+
+    // enough stock is available
+    if (product.quantity < this.quantity) {
+      return next(new Error('Insufficient stock available'));
+    }
+
+    // Update the product quantity
+    product.quantity -= this.quantity;
+
+    // Update the inStock
+    if (product.quantity === 0) {
+      product.inStock = false;
+    }
+
+    await product.save();
+    next();
+  } catch (error) {
+    console.log('error:', error);
+  }
+});
 
 // Define Order Model
 export const OrderModel = model<IOrder>('Order', orderSchema);
