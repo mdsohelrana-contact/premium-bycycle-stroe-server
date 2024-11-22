@@ -1,24 +1,37 @@
 import { Request, Response } from 'express';
-import { IOrder, OrderModel } from './order.interface';
+import { IOrder } from './order.interface';
+import { orderServices } from './order.services';
 
-const postOrderData = async (req: Request, res: Response) => {
+// postOrder Data
+const postOrder = async (req: Request, res: Response) => {
   try {
-    const { email, product, quantity, totalPrice }: IOrder = req.body;
-    console.log('product:', product, email, totalPrice, quantity);
+    const orderData: IOrder = req.body;
 
     // Create order (inventory updates handled by pre-save hook)
-    const newOrder = await OrderModel.create({
-      email,
-      product,
-      quantity,
-      totalPrice,
-    });
-    console.log('newOrder:', newOrder);
+    const result = await orderServices.postOrderData(orderData);
 
     res.status(201).json({
       message: 'Order created successfully',
       status: true,
-      data: newOrder,
+      data: result,
+    });
+  } catch (error) {
+    res.status(400).json({
+      message: error instanceof Error ? error.message : 'An error occurred',
+      status: false,
+    });
+  }
+};
+
+// calculate Revenew
+const totalRevenue = async (req: Request, res: Response) => {
+  try {
+    const result = await orderServices.getTotalRevenew();
+
+    res.status(200).json({
+      message: 'Revenue calculated successfully',
+      status: true,
+      data: result,
     });
   } catch (error) {
     res.status(400).json({
@@ -29,5 +42,6 @@ const postOrderData = async (req: Request, res: Response) => {
 };
 
 export const orderControlers = {
-  postOrderData,
+  totalRevenue,
+  postOrder,
 };
