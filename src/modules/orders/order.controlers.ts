@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { IOrder } from './order.interface';
 import { orderServices } from './order.services';
 
 // postOrder Data
-const postOrder = async (req: Request, res: Response) => {
+const postOrder = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const orderData: IOrder = req.body;
 
@@ -16,15 +16,17 @@ const postOrder = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    res.status(400).json({
-      message: error instanceof Error ? error.message : 'An error occurred',
-      status: false,
-    });
+    // next is global error handaling method
+    next(error);
   }
 };
 
 // calculate Revenew
-const totalRevenue = async (req: Request, res: Response) => {
+const totalRevenue = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const result = await orderServices.getTotalRevenew();
 
@@ -34,10 +36,8 @@ const totalRevenue = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    res.status(400).json({
-      message: error instanceof Error ? error.message : 'An error occurred',
-      status: false,
-    });
+    // next is global error handaling method
+    next(error);
   }
 };
 

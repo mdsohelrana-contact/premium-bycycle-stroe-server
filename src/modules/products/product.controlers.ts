@@ -1,9 +1,9 @@
-import { Request, Response } from 'express';
+import { NextFunction, Request, Response } from 'express';
 import { productServices } from './product.services';
 import { IBicycle } from './product.interface';
 
 // allProducts use productServices.postProductData
-const allProducts = async (req: Request, res: Response) => {
+const allProducts = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await productServices.getAllProducts();
     res.status(200).json({
@@ -12,15 +12,13 @@ const allProducts = async (req: Request, res: Response) => {
       data: result,
     });
   } catch (error) {
-    res.json({
-      message: error || 'Something went wrong',
-      status: false,
-    });
+    // next is global error handaling method
+    next(error);
   }
 };
 
 // getSingleProduct data
-const singleData = async (req: Request, res: Response) => {
+const singleData = async (req: Request, res: Response, next: NextFunction) => {
   // searching ID
   const productId = req.params.productId;
 
@@ -38,16 +36,14 @@ const singleData = async (req: Request, res: Response) => {
       status: true,
       data: result,
     });
-  } catch (error: any) {
-    res.json({
-      message: error.message || 'Product Not Found',
-      status: false,
-    });
+  } catch (error) {
+    // next is global error handaling method
+    next(error);
   }
 };
 
 // postProduct Data use productServices.postProductData
-const postProduct = async (req: Request, res: Response) => {
+const postProduct = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const productData: IBicycle = req.body;
     const result = await productServices.postProductData(productData);
@@ -57,20 +53,19 @@ const postProduct = async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-  } catch (error: any) {
-    res.json({
-      message: 'Validation failed',
-      success: false,
-      error,
-      stack: error.stack || 'Something went wrong',
-    });
+  } catch (error) {
+    // next is global error handaling method
+    next(error);
   }
 };
 
 // updateProduct
-const updateProduct = async (req: Request, res: Response) => {
+const updateProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   const { productId } = req.params;
-  console.log('productId:', productId);
   const { name, brand, price, type, description, quantity, inStock }: IBicycle =
     req.body;
   try {
@@ -96,16 +91,18 @@ const updateProduct = async (req: Request, res: Response) => {
       success: true,
       data: result,
     });
-  } catch (error: any) {
-    res.json({
-      message: error.message || 'Product Not Found',
-      status: false,
-    });
+  } catch (error) {
+    // next is global error handaling method
+    next(error);
   }
 };
 
 // deleteSingleProduct By ID
-const deleteSingleProduct = async (req: Request, res: Response) => {
+const deleteSingleProduct = async (
+  req: Request,
+  res: Response,
+  next: NextFunction,
+) => {
   try {
     const { productId } = req.params;
 
@@ -123,11 +120,9 @@ const deleteSingleProduct = async (req: Request, res: Response) => {
       status: true,
       data: {},
     });
-  } catch (error: any) {
-    res.json({
-      message: error.message || 'Something went wrong',
-      status: false,
-    });
+  } catch (error) {
+    // next is global error handaling method
+    next(error);
   }
 };
 
