@@ -24,16 +24,16 @@ A Bicycle Store application built with **TypeScript** , **Express.js** , and **M
 
 # Bicycles
 
-#### Create a Bicycle
+#### Create a Bicycle (POST)
 
 ```http
-  POST /api/products
+   /api/products
 ```
 
-#### Get All Bicycles
+#### Get All Bicycles (GET)
 
 ```http
-  GET /api/products
+   /api/products
 ```
 
 #### Get a Specific Bicycle (GET)
