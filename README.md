@@ -119,4 +119,4 @@ To run this project, you will need to add the following environment variables to
 
 ## Server Live URL
 
-https://assignment-api-project.vercel.app/
+https://assignmen-2-project-api.vercel.app/
