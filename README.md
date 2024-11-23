@@ -20,6 +20,43 @@ A Bicycle Store application built with **TypeScript** , **Express.js** , and **M
 - Error Handling : Fllow globals errorHandle model
 - Environment Variables : Managed with `dotenv`
 
+## Run Locally
+
+Clone the project
+
+```bash
+  git clone https://github.com/rana5699/assignment-2.git
+```
+
+Go to the project directory
+
+```bash
+ cd bicycle-store
+
+```
+
+Install dependencies
+
+```bash
+  npm install
+```
+
+Start the server
+
+```bash
+  npm run dev
+```
+
+## Environment Variables
+
+To run this project, you will need to add the following environment variables to your `.env` file
+
+`PORT`
+
+`DATABASEURL`
+
+`NODE_ENV`
+
 ## API Reference
 
 # Bicycles
