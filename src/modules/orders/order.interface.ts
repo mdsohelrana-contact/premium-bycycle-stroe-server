@@ -4,8 +4,10 @@ import { BicycleModel } from '../products/product.interface';
 // Define order interface
 export interface IOrder extends Document {
   email: string;
-  product: Types.ObjectId;
-  quantity: number;
+  products: {
+    product: Types.ObjectId;
+    quantity: number;
+  }[];
   totalPrice: number;
 }
 
@@ -23,19 +25,27 @@ export const orderSchema = new Schema<IOrder>(
       required: [true, 'Email address is required'],
       validate: [validateEmail, 'Please fill a valid email address'],
     },
-    product: {
-      type: Schema.Types.ObjectId,
-      required: [true, 'Product reference is required'],
-    },
-    quantity: {
-      type: Number,
-      required: [true, 'Quantity is required'],
-      min: [1, 'Quantity must be at least 1'],
-    },
+    products: [
+      new Schema(
+        {
+          product: {
+            type: Schema.Types.ObjectId,
+            ref: 'Bycicle',
+            required: true,
+          },
+          quantity: {
+            type: Number,
+            required: true,
+            min: [1, 'Quantity must be at least 1'],
+          },
+        },
+        { _id: false },
+      ),
+    ],
+
     totalPrice: {
       type: Number,
-      // required: [true, 'Total price is required'],
-      // min: [0, 'Total price must be a positive number'],
+      default: 0,
     },
   },
   { timestamps: true, versionKey: false },
@@ -44,38 +54,44 @@ export const orderSchema = new Schema<IOrder>(
 // Pre-save hook to validate stock and update inventory
 orderSchema.pre('save', async function (next) {
   try {
-    // Fetch the product
-    const product = await BicycleModel.findById(this.product);
-    if (!product) {
-      return next(new Error('Product not found'));
+    let totalPrice = 0;
+
+    for (const item of this.products) {
+      const { quantity, product } = item;
+
+      // Fetch the product
+      const bicycle = await BicycleModel.findById(product);
+
+      if (!bicycle) {
+        return next(new Error(`Product with ID ${product} not found`));
+      }
+
+      // Check if enough stock is available
+      if (bicycle.quantity < quantity) {
+        return next(
+          new Error(
+            `Insufficient stock for product: ${bicycle.name}. Available: ${bicycle.quantity}, requested: ${quantity}.`,
+          ),
+        );
+      }
+
+      // calculatePrice
+      totalPrice += bicycle.price * quantity;
+
+      // Update the product quantity
+      bicycle.quantity -= quantity;
+
+      // Update the inStock
+      if (bicycle.quantity === 0) {
+        bicycle.inStock = false;
+      }
+
+      await bicycle.save();
     }
 
-    // ! calculatePrice Unuse Support sesion instuctor sister command Date: 11/22/24 11:03 PM
-    // if (product.price * this.quantity !== this.totalPrice) {
-    //   return next(
-    //     new Error(
-    //       `Price mismatch: Expected total price is ${product.price * this.quantity}, but received ${this.totalPrice}`,
-    //     ),
-    //   );
-    // }
+    // Set total price
+    this.totalPrice = totalPrice;
 
-    // calculatePrice
-    this.totalPrice = product.price * this.quantity;
-
-    // enough stock is available
-    if (product.quantity < this.quantity) {
-      return next(new Error('Insufficient stock available'));
-    }
-
-    // Update the product quantity
-    product.quantity -= this.quantity;
-
-    // Update the inStock
-    if (product.quantity === 0) {
-      product.inStock = false;
-    }
-
-    await product.save();
     next();
   } catch (error) {
     return error;

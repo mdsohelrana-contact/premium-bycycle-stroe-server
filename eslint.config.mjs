@@ -19,6 +19,7 @@ export default [
       'prefer-const': 'error',
       'no-undef': 'error',
       'no-console': 'warn',
+      '@typescript-eslint/no-explicit-any': 'warn',
     },
   },
 ];

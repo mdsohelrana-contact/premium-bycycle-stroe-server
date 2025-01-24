@@ -1,7 +1,11 @@
-import express, { Application, NextFunction, Request, Response } from 'express';
+import express, { Application } from 'express';
 import cors from 'cors';
 import productRouter from './modules/products/product.routers';
 import orderRouter from './modules/orders/order.routers';
+import notFound from './middlewares/notFound';
+import globalErrorHandlar from './middlewares/globalErrorHandelar';
+import userRoutes from './modules/users/user.routes';
+import authRouter from './modules/auth/auth.routes';
 
 const app: Application = express();
 
@@ -14,33 +18,21 @@ app.use('/api', productRouter);
 // Define Product Order ROUTE
 app.use('/api', orderRouter);
 
+// Define User Routes
+app.use('/api', userRoutes);
+
+// Define auth routes
+app.use('/api', authRouter);
+
 app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
 // //! Define error interface
-interface IError extends Error {
-  status: number;
-  name: string;
-  stack: string;
-  errors: object;
-}
+
 // //! global error handaling midlleware
-app.use((err: unknown, req: Request, res: Response, next: NextFunction) => {
-  // I understand this better than TypeScript.
-  const error = err as IError;
+app.use(globalErrorHandlar);
 
-  res.status(error.status || 500).json({
-    message: error.message,
-    success: false,
-    error: {
-      name: error.name,
-      errors: error.errors,
-    },
-    stack: error.stack || 'Something went wrong',
-  });
-
-  next();
-});
+app.use(notFound);
 
 export default app;

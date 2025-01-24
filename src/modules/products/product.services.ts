@@ -1,28 +1,24 @@
+import QueryBuilder from '../../queryBuilder/QueryBuilder';
 import { BicycleModel, IBicycle } from './product.interface';
 
 // getAllProducts service
-const getAllProducts = async (searchTerm: string | undefined) => {
-  let filter = {};
+const getAllProducts = async (query: Record<string, unknown>) => {
+  const productSearchFields = ['name', 'brand'];
 
-  if (searchTerm && searchTerm.trim() !== '') {
-    filter = {
-      $or: [
-        {
-          name: new RegExp(searchTerm, 'i'),
-        },
-        {
-          brand: new RegExp(searchTerm, 'i'),
-        },
-        {
-          type: new RegExp(searchTerm, 'i'),
-        },
-      ],
-    };
-  }
+  const studentQuery = new QueryBuilder(BicycleModel.find(), query)
+    .search(productSearchFields)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
 
-  const allProducts = await BicycleModel.find(filter);
+  const meta = await studentQuery.countTotal();
+  const result = await studentQuery.modelQuery;
 
-  return allProducts;
+  return {
+    meta,
+    result,
+  };
 };
 
 // get a single product By ID service
