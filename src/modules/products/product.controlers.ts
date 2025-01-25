@@ -12,7 +12,8 @@ const allProducts = catchAsync(async (req, res) => {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Bicycles retrieved successfully.',
-    data: result,
+    meta: result.meta,
+    data: result.result,
   });
 });
 

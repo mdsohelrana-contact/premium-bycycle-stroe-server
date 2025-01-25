@@ -30,12 +30,13 @@ const totalRevenue = catchAsync(async (req, res) => {
 const getOrder = catchAsync(async (req, res) => {
   const { userId } = req.params;
 
-  const result = await orderServices.getOrderByUserId(userId);
+  const result = await orderServices.getOrderByUserId(userId, req.query);
 
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
     success: true,
     message: 'Order retrived successfully',
+    meta: result.meta,
     data: {
       totalCost: result.totalCost,
       allOrders: result.result,

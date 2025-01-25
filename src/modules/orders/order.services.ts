@@ -3,6 +3,7 @@ import AppError from '../../errors/AppError';
 import { IOrder, OrderModel } from './order.interface';
 import { User } from '../users/user.model';
 import { orderUtils } from './order.utils';
+import QueryBuilder from '../../queryBuilder/QueryBuilder';
 
 // Define getTotalRevenew service
 const getTotalRevenew = async () => {
@@ -162,10 +163,18 @@ const postOrderData = async (orderInfo: IOrder, client_ip: string) => {
 };
 
 // get orders
-const getOrderByUserId = async (userId: string) => {
-  const result = await OrderModel.find({
-    userId,
-  });
+const getOrderByUserId = async (
+  userId: string,
+  query: Record<string, unknown>,
+) => {
+  const orderQuery = new QueryBuilder(OrderModel.find(), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const meta = await orderQuery.countTotal();
+  const result = await orderQuery.modelQuery;
 
   if (result?.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Order unavailable');
@@ -176,6 +185,7 @@ const getOrderByUserId = async (userId: string) => {
     .reduce((acc, curr) => acc + curr, 0);
 
   return {
+    meta,
     result,
     totalCost,
   };
