@@ -1,14 +1,22 @@
 import { Router } from 'express';
 import { authControlers } from './auth.controlers';
 import validateRequest from '../../middlewares/validatedRequest';
-import { loginInfoValidation } from './auth.validation';
+import { authValidation } from './auth.validation';
 
 const authRouter = Router();
 
 authRouter.post(
   '/auth/login',
-  validateRequest(loginInfoValidation),
+  validateRequest(authValidation.loginInfoValidationSchema),
   authControlers.loginUser,
 );
+
+// authRouter.post(
+//   '/auth/change-password',
+
+//   auth('admin', 'customer'),
+//   validateRequest(authValidation.changePasswordValidationSchema),
+//   authControlers.chnagePassword,
+// );
 
 export default authRouter;

@@ -22,6 +22,29 @@ const loginUser = catchAsync(async (req, res, next) => {
   }
 });
 
+// // change password
+// const chnagePassword = catchAsync(async (req, res) => {
+//   if (!req.user) {
+//     throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
+//   }
+
+//   const userData: JwtPayload = req.user;
+//   const { oldPassword, newPassword } = req.body;
+
+//   const result = await authServices.changePassword(userData, {
+//     oldPassword,
+//     newPassword,
+//   });
+
+//   responseHandelar(res, {
+//     statusCode: StatusCodes.OK,
+//     success: true,
+//     message: 'Password is updated succesfully!',
+//     data: result,
+//   });
+// });
+
 export const authControlers = {
   loginUser,
+  // chnagePassword,
 };

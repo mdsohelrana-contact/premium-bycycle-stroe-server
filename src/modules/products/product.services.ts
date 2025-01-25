@@ -5,15 +5,15 @@ import { BicycleModel, IBicycle } from './product.interface';
 const getAllProducts = async (query: Record<string, unknown>) => {
   const productSearchFields = ['name', 'brand'];
 
-  const studentQuery = new QueryBuilder(BicycleModel.find(), query)
+  const productQuery = new QueryBuilder(BicycleModel.find(), query)
     .search(productSearchFields)
     .filter()
     .sort()
     .paginate()
     .fields();
 
-  const meta = await studentQuery.countTotal();
-  const result = await studentQuery.modelQuery;
+  const meta = await productQuery.countTotal();
+  const result = await productQuery.modelQuery;
 
   return {
     meta,

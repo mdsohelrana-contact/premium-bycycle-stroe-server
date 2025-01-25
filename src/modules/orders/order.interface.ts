@@ -1,36 +1,32 @@
 import { Document, model, Schema, Types } from 'mongoose';
 import { BicycleModel } from '../products/product.interface';
+import { User } from '../users/user.model';
 
 // Define order interface
 export interface IOrder extends Document {
-  email: string;
+  userId: Types.ObjectId;
   products: {
     product: Types.ObjectId;
     quantity: number;
   }[];
   totalPrice: number;
+  status: 'Pending' | 'Paid' | 'Completed' | 'Cancel' | 'Failed';
 }
-
-// simple email validaation
-const validateEmail = (email: string) => {
-  const emailSyntax = /^\w+([.-]?\w+)*@\w+([.-]?\w+)*(\.\w{2,3})+$/;
-  return emailSyntax.test(email);
-};
 
 // Define Order Schema
 export const orderSchema = new Schema<IOrder>(
   {
-    email: {
-      type: String,
-      required: [true, 'Email address is required'],
-      validate: [validateEmail, 'Please fill a valid email address'],
+    userId: {
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+      required: [true, 'User is required'],
     },
     products: [
       new Schema(
         {
           product: {
             type: Schema.Types.ObjectId,
-            ref: 'Bycicle',
+            ref: 'Bicycle',
             required: true,
           },
           quantity: {
@@ -42,10 +38,14 @@ export const orderSchema = new Schema<IOrder>(
         { _id: false },
       ),
     ],
-
     totalPrice: {
       type: Number,
       default: 0,
+    },
+    status: {
+      type: String,
+      enum: ['Pending', 'Paid', 'Completed', 'Cancel', 'Failed'],
+      default: 'Pending',
     },
   },
   { timestamps: true, versionKey: false },
@@ -54,6 +54,12 @@ export const orderSchema = new Schema<IOrder>(
 // Pre-save hook to validate stock and update inventory
 orderSchema.pre('save', async function (next) {
   try {
+    const isUserExist = await User.findById(this.userId);
+
+    if (!isUserExist) {
+      return next(new Error('User not found !!.'));
+    }
+
     let totalPrice = 0;
 
     for (const item of this.products) {

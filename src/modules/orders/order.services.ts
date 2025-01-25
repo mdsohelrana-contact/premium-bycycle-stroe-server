@@ -43,7 +43,7 @@ const getTotalRevenew = async () => {
 
           {
             $lookup: {
-              from: 'bycicles',
+              from: 'bicycles',
               localField: '_id',
               foreignField: '_id',
               as: 'productDetails',
