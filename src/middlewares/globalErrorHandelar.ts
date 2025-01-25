@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
 import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
-import { TErrorSources } from '../interface/error';
+import { TErrorSources } from '../interfaces/error';
 import handaleZodError from '../errors/handaleZodError';
 import handaleValidationError from '../errors/handaleValidationError';
 import { ZodError } from 'zod';

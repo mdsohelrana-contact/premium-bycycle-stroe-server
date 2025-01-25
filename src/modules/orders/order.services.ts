@@ -1,4 +1,8 @@
+import { StatusCodes } from 'http-status-codes';
+import AppError from '../../errors/AppError';
 import { IOrder, OrderModel } from './order.interface';
+import { User } from '../users/user.model';
+import { orderUtils } from './order.utils';
 
 // Define getTotalRevenew service
 const getTotalRevenew = async () => {
@@ -69,6 +73,20 @@ const getTotalRevenew = async () => {
             },
           },
         ],
+
+        allOrders: [
+          {
+            $group: {
+              _id: '$_id',
+              orderDetails: { $first: '$$ROOT' },
+            },
+          },
+          {
+            $replaceRoot: {
+              newRoot: '$orderDetails',
+            },
+          },
+        ],
       },
     },
 
@@ -76,6 +94,7 @@ const getTotalRevenew = async () => {
       $project: {
         totalRevenue: { $arrayElemAt: ['$totalRevenue.totalRevenue', 0] },
         topSellingProducts: 1,
+        allOrders: 1,
       },
     },
   ]);
@@ -85,22 +104,113 @@ const getTotalRevenew = async () => {
     return {
       totalRevenue: result[0].totalRevenue || 0,
       topSellingProducts: result[0].topSellingProducts,
+      allOrders: result[0].allOrders,
     };
   }
 
   return {
     totalRevenue: 0,
     topSellingProducts: [],
+    allOrders: [],
   };
 };
 
 // Define postOrderData  service
-const postOrderData = async (orderInfo: IOrder) => {
-  const savedOrderData = await OrderModel.create(orderInfo);
-  return savedOrderData;
+const postOrderData = async (orderInfo: IOrder, client_ip: string) => {
+  const user = await User.findById(orderInfo.userId);
+
+  // check user is exist
+  if (!user) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'User not found!!.');
+  }
+
+  // check user is deactivated
+  if (!user?.isActive) {
+    throw new AppError(StatusCodes.BAD_REQUEST, 'User is deactivated !');
+  }
+
+  let savedOrderData = await OrderModel.create(orderInfo);
+
+  // payment integration
+  const shurjopayPayload = {
+    amount: savedOrderData.totalPrice,
+    order_id: savedOrderData._id,
+    currency: 'BDT',
+    customer_name: user.name,
+    customer_address: `${orderInfo.address.city},${orderInfo.address.country}`,
+    customer_email: user.email,
+    customer_phone: orderInfo.phoneNumber,
+    customer_city: orderInfo.address.city,
+    client_ip,
+  };
+
+  const payment = await orderUtils.makePaymentAsync(shurjopayPayload);
+
+  if (payment?.transactionStatus) {
+    savedOrderData = await savedOrderData.updateOne(
+      {
+        transactionInfo: {
+          transactionId: payment.sp_order_id,
+          paymentStatus: payment.transactionStatus,
+        },
+      },
+      { new: true },
+    );
+  }
+
+  return payment;
+};
+
+// get orders
+const getOrderByUserId = async (userId: string) => {
+  const result = await OrderModel.find({
+    userId,
+  });
+
+  if (result?.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Order unavailable');
+  }
+
+  const totalCost = result
+    .map((item) => item.totalPrice)
+    .reduce((acc, curr) => acc + curr, 0);
+
+  return {
+    result,
+    totalCost,
+  };
+};
+
+const verifyPayment = async (order_id: string) => {
+  const verifyPayment = await orderUtils.verifyPaymentAsync(order_id);
+
+  if (verifyPayment.length) {
+    await OrderModel.findOneAndUpdate(
+      {
+        'transactionInfo.transactionId': order_id,
+      },
+      {
+        'transactionInfo.paymentMethod': verifyPayment[0].method,
+
+        'transactionInfo.paymentStatus':
+          verifyPayment[0].bank_status == 'Success'
+            ? 'Paid'
+            : verifyPayment[0].bank_status == 'Failed'
+              ? 'Pending'
+              : verifyPayment[0].bank_status == 'Cancel'
+                ? 'Cancelled'
+                : '',
+        'transactionInfo.paymentDate': verifyPayment[0].date_time,
+      },
+    );
+  }
+
+  return verifyPayment;
 };
 
 export const orderServices = {
   getTotalRevenew,
   postOrderData,
+  getOrderByUserId,
+  verifyPayment,
 };

@@ -1,47 +1,64 @@
-import { NextFunction, Request, Response } from 'express';
-import { IOrder } from './order.interface';
 import { orderServices } from './order.services';
+import responseHandelar from '../../utils/responseHandelar';
+import { StatusCodes } from 'http-status-codes';
+import catchAsync from '../../utils/catchAsync';
 
 // postOrder Data
-const postOrder = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const orderData: IOrder = req.body;
+const postOrder = catchAsync(async (req, res) => {
+  const result = await orderServices.postOrderData(req.body, req.ip!);
 
-    // Create order (inventory updates handled by pre-save hook)
-    const result = await orderServices.postOrderData(orderData);
-
-    res.status(201).json({
-      message: 'Order created successfully',
-      status: true,
-      data: result,
-    });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
-  }
-};
+  responseHandelar(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: 'Order created successful.',
+    data: result,
+  });
+});
 
 // calculate Revenew
-const totalRevenue = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const result = await orderServices.getTotalRevenew();
+const totalRevenue = catchAsync(async (req, res) => {
+  const result = await orderServices.getTotalRevenew();
 
-    res.status(200).json({
-      message: 'Revenue calculated successfully',
-      status: true,
-      data: result,
-    });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
-  }
-};
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Revenue calculated successfully',
+    data: result,
+  });
+});
+
+const getOrder = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+
+  const result = await orderServices.getOrderByUserId(userId);
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order retrived successfully',
+    data: {
+      totalCost: result.totalCost,
+      allOrders: result.result,
+    },
+  });
+});
+
+const verifyPayment = catchAsync(async (req, res) => {
+  const result = await orderServices.verifyPayment(
+    req.query.order_id as string,
+  );
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order verified successfully',
+    data: result,
+  });
+});
 
 export const orderControlers = {
   totalRevenue,
   postOrder,
+  getOrder,
+  verifyPayment,
 };

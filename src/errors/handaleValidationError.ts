@@ -1,5 +1,5 @@
 import mongoose from 'mongoose';
-import { TErrorResponse, TErrorSources } from '../interface/error';
+import { TErrorResponse, TErrorSources } from '../interfaces/error';
 
 const handaleValidationError = (
   err: mongoose.Error.ValidationError,

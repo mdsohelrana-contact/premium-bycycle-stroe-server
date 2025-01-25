@@ -28,8 +28,6 @@ app.get('/', (req, res) => {
   res.send('Hello World!');
 });
 
-// //! Define error interface
-
 // //! global error handaling midlleware
 app.use(globalErrorHandlar);
 

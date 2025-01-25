@@ -12,7 +12,11 @@ orderRouter.post(
   orderControlers.postOrder,
 );
 
+orderRouter.get('/verify', orderControlers.verifyPayment);
+
 // create total revenew  Router
 orderRouter.get('/orders/revenue', orderControlers.totalRevenue);
+
+orderRouter.get('/orders/:userId', orderControlers.getOrder);
 
 export default orderRouter;

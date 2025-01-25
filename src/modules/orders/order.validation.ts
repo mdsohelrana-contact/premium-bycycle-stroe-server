@@ -12,9 +12,22 @@ const orderValidationSchema = z.object({
     userId: z.string({ required_error: 'User is required' }),
     products: z.array(productSchema).min(1),
     totalPrice: z.number().optional(),
-    status: z
-      .enum(['Pending', 'Paid', 'Completed', 'Cancel', 'Failed'])
-      .default('Pending')
+    address: z.object({
+      city: z.string().min(1, 'City is required'),
+      country: z.string().min(1, 'Country is required'),
+    }),
+    phoneNumber: z
+      .string()
+      .min(10, 'Phone number should be at least 10 digits'),
+    transactionInfo: z
+      .object({
+        transactionId: z.string().optional(),
+        paymentMethod: z.string().optional(),
+        paymentStatus: z
+          .enum(['Pending', 'Paid', 'Failed', 'Cancel'])
+          .optional(),
+        paymentDate: z.date().optional(),
+      })
       .optional(),
   }),
 });

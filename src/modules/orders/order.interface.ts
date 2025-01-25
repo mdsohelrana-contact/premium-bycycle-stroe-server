@@ -1,6 +1,5 @@
 import { Document, model, Schema, Types } from 'mongoose';
 import { BicycleModel } from '../products/product.interface';
-import { User } from '../users/user.model';
 
 // Define order interface
 export interface IOrder extends Document {
@@ -10,7 +9,17 @@ export interface IOrder extends Document {
     quantity: number;
   }[];
   totalPrice: number;
-  status: 'Pending' | 'Paid' | 'Completed' | 'Cancel' | 'Failed';
+  address: {
+    city: string;
+    country: string;
+  };
+  phoneNumber: string;
+  transactionInfo?: {
+    transactionId: string;
+    paymentMethod: string;
+    paymentStatus: 'Pending' | 'Paid' | 'Failed' | 'Cancel';
+    paymentDate?: Date;
+  };
 }
 
 // Define Order Schema
@@ -41,25 +50,46 @@ export const orderSchema = new Schema<IOrder>(
     totalPrice: {
       type: Number,
       default: 0,
+      min: [0, 'Total price cannot be negative'],
     },
-    status: {
+    address: {
+      city: {
+        type: String,
+        required: true,
+      },
+      country: {
+        type: String,
+        required: true,
+      },
+    },
+    phoneNumber: {
       type: String,
-      enum: ['Pending', 'Paid', 'Completed', 'Cancel', 'Failed'],
-      default: 'Pending',
+      required: true,
+    },
+    transactionInfo: {
+      transactionId: {
+        type: String,
+        required: false,
+      },
+      paymentMethod: {
+        type: String,
+        required: false,
+      },
+      paymentStatus: {
+        type: String,
+        enum: ['Pending', 'Paid', 'Failed', 'Cancel'],
+        default: 'Pending',
+      },
+      paymentDate: {
+        type: Date,
+      },
     },
   },
   { timestamps: true, versionKey: false },
 );
-
 // Pre-save hook to validate stock and update inventory
 orderSchema.pre('save', async function (next) {
   try {
-    const isUserExist = await User.findById(this.userId);
-
-    if (!isUserExist) {
-      return next(new Error('User not found !!.'));
-    }
-
     let totalPrice = 0;
 
     for (const item of this.products) {
