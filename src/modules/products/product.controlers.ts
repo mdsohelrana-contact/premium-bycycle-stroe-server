@@ -1,131 +1,124 @@
-import { NextFunction, Request, Response } from 'express';
 import { productServices } from './product.services';
 import { IBicycle } from './product.interface';
+import catchAsync from '../../utils/catchAsync';
+import responseHandelar from '../../utils/responseHandelar';
+import { StatusCodes } from 'http-status-codes';
 
 // allProducts use productServices.postProductData
-const allProducts = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const result = await productServices.getAllProducts(req.query);
+const allProducts = catchAsync(async (req, res) => {
+  const result = await productServices.getAllProducts(req.query);
 
-    res.status(200).json({
-      message: 'Bicycles retrieved successfully',
-      status: true,
-      data: result,
-    });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
-  }
-};
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Bicycles retrieved successfully.',
+    data: result,
+  });
+});
 
 // getSingleProduct data
-const singleData = async (req: Request, res: Response, next: NextFunction) => {
+const singleData = catchAsync(async (req, res) => {
   // searching ID
   const productId = req.params.productId;
 
-  if (!productId) {
-    res.status(404).json({
-      message: 'Products not found',
-      success: false,
-    });
-  }
-  try {
-    const result = await productServices.getSingleProduct(productId);
+  const result = await productServices.getSingleProduct(productId);
 
-    res.status(200).json({
-      message: 'Bicycle retrieved successfully',
-      status: true,
-      data: result,
+  if (!result) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Bicycle not found!!.',
+      data: null,
     });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
   }
-};
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Bicycle retrieved successfully.',
+    data: result,
+  });
+});
 
 // postProduct Data use productServices.postProductData
-const postProduct = async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const productData: IBicycle = req.body;
-    const result = await productServices.postProductData(productData);
+const postProduct = catchAsync(async (req, res) => {
+  const productData: IBicycle = req.body;
+  const result = await productServices.postProductData(productData);
 
-    res.status(200).json({
-      message: 'Bicycle created successfully',
-      success: true,
-      data: result,
-    });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
-  }
-};
+  responseHandelar(res, {
+    statusCode: StatusCodes.CREATED,
+    success: true,
+    message: 'Bicycle created successfully.',
+    data: result,
+  });
+});
 
 // updateProduct
-const updateProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
+const updateProduct = catchAsync(async (req, res) => {
   const { productId } = req.params;
-  const { name, brand, price, type, description, quantity, inStock }: IBicycle =
-    req.body;
-  try {
-    const result = await productServices.updateProductData(productId, {
-      name,
-      brand,
-      price,
-      type,
-      description,
-      quantity,
-      inStock,
-    });
+  const {
+    name,
+    brand,
+    price,
+    type,
+    imageUrl,
+    description,
+    quantity,
+    rating,
+    inStock,
+  }: IBicycle = req.body;
 
-    if (!result) {
-      res.status(404).json({
-        message: 'Bicycle not found',
-        success: false,
-      });
-    }
+  const result = await productServices.updateProductData(productId, {
+    name,
+    brand,
+    price,
+    type,
+    imageUrl,
+    description,
+    quantity,
+    rating,
+    inStock,
+  });
 
-    res.status(200).json({
-      message: 'Bicycle updated successfully',
-      success: true,
-      data: result,
+  if (!result) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Bicycle not found!!.',
+      data: null,
     });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
   }
-};
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Bicycle updated successfully.',
+    data: result,
+  });
+});
 
 // deleteSingleProduct By ID
-const deleteSingleProduct = async (
-  req: Request,
-  res: Response,
-  next: NextFunction,
-) => {
-  try {
-    const { productId } = req.params;
+const deleteSingleProduct = catchAsync(async (req, res) => {
+  const { productId } = req.params;
 
-    const result = await productServices.deleteProduct(productId);
+  const result = await productServices.deleteProduct(productId);
 
-    if (!result) {
-      res.status(404).json({
-        message: 'Product not found or could not be deleted.',
-        status: false,
-      });
-    }
-
-    res.status(200).json({
-      message: 'Bicycle deleted successfully',
-      status: true,
-      data: {},
+  if (!result) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Bicycle not found!!.',
+      data: null,
     });
-  } catch (error) {
-    // next is global error handaling method
-    next(error);
   }
-};
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Bicycle deleted successfully.',
+    data: {},
+  });
+});
 
 export const productControlers = {
   allProducts,

@@ -15,13 +15,15 @@ export interface IBicycle {
   brand: string;
   price: number;
   type: Bicycletype;
+  imageUrl: string;
   description: string;
   quantity: number;
+  rating: number;
   inStock: boolean;
 }
 
 // Define Bycicle schema
-export const bicicleSchema = new Schema<IBicycle>(
+export const bicycleSchema = new Schema<IBicycle>(
   {
     name: {
       type: String,
@@ -45,6 +47,16 @@ export const bicicleSchema = new Schema<IBicycle>(
       enum: Object.values(Bicycletype),
       message: '{VALUE} is not supported',
     },
+    imageUrl: {
+      type: String,
+      required: [true, 'The image URL is required.'],
+      validate: {
+        validator: function (v: string) {
+          return /^https?:\/\/.+\.(jpg|jpeg|png|gif|webp)$/.test(v);
+        },
+        message: 'Invalid image URL format.',
+      },
+    },
     description: {
       type: String,
       required: [true, 'The description is required.'],
@@ -53,6 +65,12 @@ export const bicicleSchema = new Schema<IBicycle>(
       type: Number,
       required: [true, 'The quantity is required.'],
       min: [0, 'The quantity cannot be negative, got {VALUE}'],
+    },
+    rating: {
+      type: Number,
+      required: [true, 'The quantity is required.'],
+      min: [0, 'The quantity cannot be negative, got {VALUE}'],
+      max: [5, 'The rating cannot be greater than 5, got {VALUE}.'],
     },
     inStock: {
       type: Boolean,
@@ -63,4 +81,4 @@ export const bicicleSchema = new Schema<IBicycle>(
 );
 
 // Define Bicle Model (as a collection)
-export const BicycleModel = model<IBicycle>('Bycicle', bicicleSchema);
+export const BicycleModel = model<IBicycle>('Bicycle', bicycleSchema);
