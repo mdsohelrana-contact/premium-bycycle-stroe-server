@@ -2,6 +2,8 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 import { authServices } from './auth.services';
 import responseHandelar from '../../utils/responseHandelar';
+import AppError from '../../errors/AppError';
+import { JwtPayload } from 'jsonwebtoken';
 
 const loginUser = catchAsync(async (req, res, next) => {
   try {
@@ -28,7 +30,7 @@ const loginUser = catchAsync(async (req, res, next) => {
 //     throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
 //   }
 
-//   const userData: JwtPayload = req.user;
+//   const userData = req.user as JwtPayload;
 //   const { oldPassword, newPassword } = req.body;
 
 //   const result = await authServices.changePassword(userData, {

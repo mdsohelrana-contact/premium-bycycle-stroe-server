@@ -22,7 +22,7 @@ const productValidationSchema = z.object({
       .int()
       .nonnegative('Quantity must be a non-negative integer'),
     rating: z.number().default(0),
-    inStock: z.boolean(),
+    inStock: z.boolean().optional().default(true),
   }),
 });
 

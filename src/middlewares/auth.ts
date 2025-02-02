@@ -49,9 +49,8 @@ const auth = (...userRoles: TUserRole[]) => {
         // checking if the user is already deleted
 
         if (!user.isActive) {
-          throw new AppError(
-            StatusCodes.FORBIDDEN,
-            'This user is deactivate  !',
+          return next(
+            new AppError(StatusCodes.BAD_REQUEST, 'This user is deactivate  !'),
           );
         }
 
@@ -63,7 +62,7 @@ const auth = (...userRoles: TUserRole[]) => {
         }
 
         // Attach the decoded token to the request object
-        // req.user = decoded as JwtPayload;
+        // req.user = decoded as JwtPayload & { role: string };
 
         next();
       });

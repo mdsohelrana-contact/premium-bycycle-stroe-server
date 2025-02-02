@@ -23,8 +23,8 @@ const createUser = catchAsync(async (req, res) => {
   const saveduserData = await userServices.createUserIntoDB(userData);
 
   responseHandelar(res, {
-    statusCode: StatusCodes.CONFLICT,
-    success: false,
+    statusCode: StatusCodes.CREATED,
+    success: true,
     message: 'User register successful.',
     data: saveduserData,
   });
@@ -70,6 +70,17 @@ const singleUserData = catchAsync(async (req, res) => {
 const updatedUserSttatus = catchAsync(async (req, res) => {
   // searching ID
   const userId = req.params.id;
+
+  const isBlocked = await User.findOne({ _id: userId });
+
+  if (isBlocked && !isBlocked.isActive) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'User already deactivated',
+      data: null,
+    });
+  }
 
   const result = await userServices.getSingleUser(userId);
 

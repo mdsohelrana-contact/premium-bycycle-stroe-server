@@ -49,6 +49,8 @@ const verifyPayment = catchAsync(async (req, res) => {
     req.query.order_id as string,
   );
 
+  console.log(result);
+
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
     success: true,

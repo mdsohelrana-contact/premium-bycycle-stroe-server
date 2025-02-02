@@ -4,6 +4,7 @@ import { IOrder, OrderModel } from './order.interface';
 import { User } from '../users/user.model';
 import { orderUtils } from './order.utils';
 import QueryBuilder from '../../queryBuilder/QueryBuilder';
+import { BicycleModel } from '../products/product.interface';
 
 // Define getTotalRevenew service
 const getTotalRevenew = async () => {
@@ -66,11 +67,7 @@ const getTotalRevenew = async () => {
               totalSaleAmount: {
                 $multiply: ['$totalSold', '$productDetails.price'],
               },
-              productName: '$productDetails.name',
-              brand: '$productDetails.brand',
-              quantity: '$productDetails.quantity',
-              price: '$productDetails.price',
-              productID: '$productDetails._id',
+              product: '$productDetails',
             },
           },
         ],
@@ -187,6 +184,7 @@ const getOrderByUserId = async (
   return {
     meta,
     result,
+    // product,
     totalCost,
   };
 };

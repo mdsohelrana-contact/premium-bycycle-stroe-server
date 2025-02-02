@@ -74,7 +74,8 @@ export const bicycleSchema = new Schema<IBicycle>(
     },
     inStock: {
       type: Boolean,
-      required: [true, 'The inStock status is required.'],
+
+      default: true,
     },
   },
   { timestamps: true, versionKey: false },
