@@ -19,4 +19,6 @@ orderRouter.get('/orders/revenue', orderControlers.totalRevenue);
 
 orderRouter.get('/orders/:userId', orderControlers.getOrder);
 
+orderRouter.put('/order/:id/updateIntent', orderControlers.updateOrderStatus);
+
 export default orderRouter;

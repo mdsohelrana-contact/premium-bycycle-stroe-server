@@ -43,7 +43,10 @@ const singleData = catchAsync(async (req, res) => {
 
 // postProduct Data use productServices.postProductData
 const postProduct = catchAsync(async (req, res) => {
-  const productData: IBicycle = req.body;
+  const productData = req.body;
+
+  // console.log(req?.file, productData);
+
   const result = await productServices.postProductData(productData);
 
   responseHandelar(res, {

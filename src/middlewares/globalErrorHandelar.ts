@@ -7,7 +7,7 @@ import handaleZodError from '../errors/handaleZodError';
 import handaleValidationError from '../errors/handaleValidationError';
 import { ZodError } from 'zod';
 import AppError from '../errors/AppError';
-import config from '../config.ts/config';
+import config from '../config/config';
 
 // //! Define global error
 const globalErrorHandlar: ErrorRequestHandler = (

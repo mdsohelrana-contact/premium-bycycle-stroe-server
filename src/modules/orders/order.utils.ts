@@ -1,5 +1,5 @@
 import Shurjopay, { PaymentResponse, VerificationResponse } from 'shurjopay';
-import config from '../../config.ts/config';
+import config from '../../config/config';
 
 const shurjopay = new Shurjopay();
 

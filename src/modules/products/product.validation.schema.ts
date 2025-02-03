@@ -32,7 +32,7 @@ const updateProductValidationSchema = z.object({
     brand: z.string().optional(),
     price: z.number().optional(),
     type: BicycletypeSchema.optional(),
-    imageUrl: z.string().url('Invalid image URL').optional(),
+    // imageUrl: z.string().url('Invalid image URL').optional(),
     description: z.string().min(1, 'Description is required').optional(),
     quantity: z
       .number()

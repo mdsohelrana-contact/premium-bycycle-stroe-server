@@ -2,7 +2,7 @@ import bcrypt from 'bcrypt';
 import { User } from '../users/user.model';
 import { TLoginInfo } from './auth.interface';
 import AppError from '../../errors/AppError';
-import config from '../../config.ts/config';
+import config from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
 import jwt, { JwtPayload } from 'jsonwebtoken';
 

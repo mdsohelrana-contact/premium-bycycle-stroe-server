@@ -4,7 +4,6 @@ import { IOrder, OrderModel } from './order.interface';
 import { User } from '../users/user.model';
 import { orderUtils } from './order.utils';
 import QueryBuilder from '../../queryBuilder/QueryBuilder';
-import { BicycleModel } from '../products/product.interface';
 
 // Define getTotalRevenew service
 const getTotalRevenew = async () => {
@@ -171,7 +170,7 @@ const getOrderByUserId = async (
     .fields();
 
   const meta = await orderQuery.countTotal();
-  const result = await orderQuery.modelQuery;
+  const result = await orderQuery.modelQuery.populate('products.product');
 
   if (result?.length === 0) {
     throw new AppError(StatusCodes.NOT_FOUND, 'Order unavailable');
@@ -187,6 +186,21 @@ const getOrderByUserId = async (
     // product,
     totalCost,
   };
+};
+
+// update order status
+const updateOrderStatus = async (payload: string, orderId: string) => {
+  const result = await OrderModel.findByIdAndUpdate(
+    {
+      _id: orderId,
+    },
+    {
+      orderIntent: payload,
+    },
+    { new: true },
+  );
+
+  return result;
 };
 
 const verifyPayment = async (order_id: string) => {
@@ -221,4 +235,5 @@ export const orderServices = {
   postOrderData,
   getOrderByUserId,
   verifyPayment,
+  updateOrderStatus,
 };

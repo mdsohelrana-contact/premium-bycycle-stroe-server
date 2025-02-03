@@ -1,6 +1,6 @@
 import app from './app';
-import config from './config.ts/config';
-import { connectDb } from './config.ts/database';
+import config from './config/config';
+import { connectDb } from './config/database';
 
 const PORT = config.port || 3000;
 

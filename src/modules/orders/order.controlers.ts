@@ -44,6 +44,30 @@ const getOrder = catchAsync(async (req, res) => {
   });
 });
 
+// update orderintent
+const updateOrderStatus = catchAsync(async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  const result = await orderServices.updateOrderStatus(status, id);
+
+  if (!result) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Order not found!',
+      data: null,
+    });
+  }
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order status updated successfully.',
+    data: result,
+  });
+});
+
 const verifyPayment = catchAsync(async (req, res) => {
   const result = await orderServices.verifyPayment(
     req.query.order_id as string,
@@ -64,4 +88,5 @@ export const orderControlers = {
   postOrder,
   getOrder,
   verifyPayment,
+  updateOrderStatus,
 };

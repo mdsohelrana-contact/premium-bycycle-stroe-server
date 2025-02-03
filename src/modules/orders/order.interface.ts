@@ -3,12 +3,13 @@ import { BicycleModel } from '../products/product.interface';
 
 // Define order interface
 export interface IOrder extends Document {
-  userId: Types.ObjectId;
+  userId: { type: Types.ObjectId; ref: 'User'; required: true };
   products: {
-    product: Types.ObjectId;
+    product: { type: Types.ObjectId; ref: 'Bicycle'; required: true };
     quantity: number;
   }[];
   totalPrice: number;
+  orderIntent: 'Confirm' | 'Reject' | 'Delivered' | 'Pending';
   address: {
     city: string;
     country: string;
@@ -51,6 +52,11 @@ export const orderSchema = new Schema<IOrder>(
       type: Number,
       default: 0,
       min: [0, 'Total price cannot be negative'],
+    },
+    orderIntent: {
+      type: String,
+      enum: ['Confirm', 'Reject', 'Delivered', 'Pending'],
+      default: 'Pending',
     },
     address: {
       city: {

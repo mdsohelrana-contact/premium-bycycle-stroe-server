@@ -15,7 +15,7 @@ export interface IBicycle {
   brand: string;
   price: number;
   type: Bicycletype;
-  imageUrl: string;
+  imageUrl?: string;
   description: string;
   quantity: number;
   rating: number;

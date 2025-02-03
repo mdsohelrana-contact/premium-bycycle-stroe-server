@@ -1,3 +1,4 @@
+import { imageToCloudinary } from '../../middlewares/imageToCloudinary';
 import QueryBuilder from '../../queryBuilder/QueryBuilder';
 import { BicycleModel, IBicycle } from './product.interface';
 
@@ -30,6 +31,19 @@ const getSingleProduct = async (productId: string) => {
 
 // postProductData service
 const postProductData = async (productData: IBicycle) => {
+  // const imageName = `${new Date()}${productData?.name}`;
+  // const path = file?.path;
+
+  // console.log(imageName, path);
+
+  // //send image to cloudinary
+  // const { secure_url } =
+  //   (await imageToCloudinary(imageName, path)) ||
+  //   'https://example.com/images/freestyle-red.jpg';
+  // productData.imageUrl = secure_url as string;
+
+  // console.log(secure_url);
+
   const createProduct = await BicycleModel.create(productData);
 
   return createProduct;

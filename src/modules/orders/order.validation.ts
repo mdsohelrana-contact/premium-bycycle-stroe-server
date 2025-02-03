@@ -12,6 +12,9 @@ const orderValidationSchema = z.object({
     userId: z.string({ required_error: 'User is required' }),
     products: z.array(productSchema).min(1),
     totalPrice: z.number().optional(),
+    orderIntent: z
+      .enum(['Confirm', 'Reject', 'Delivered', 'Pending'])
+      .default('Pending'),
     address: z.object({
       city: z.string().min(1, 'City is required'),
       country: z.string().min(1, 'Country is required'),

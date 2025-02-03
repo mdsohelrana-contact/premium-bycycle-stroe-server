@@ -5,7 +5,7 @@ import { NextFunction, Request, Response } from 'express';
 import { StatusCodes } from 'http-status-codes';
 import AppError from '../errors/AppError';
 import { TUserRole } from '../constant/user.role';
-import config from '../config.ts/config';
+import config from '../config/config';
 import { User } from '../modules/users/user.model';
 
 const auth = (...userRoles: TUserRole[]) => {
