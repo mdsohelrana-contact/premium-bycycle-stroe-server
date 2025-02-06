@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import { User } from '../users/user.model';
 import { TChangePassword, TLoginInfo } from './auth.interface';
-import AppError from '../../errors/AppError';
 import config from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
+import AppError from '../../errors/AppError';
 
 const loginUser = async (payload: TLoginInfo) => {
   // find user by email

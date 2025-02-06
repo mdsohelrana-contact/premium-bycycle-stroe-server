@@ -32,7 +32,7 @@ const chnagePassword = catchAsync(async (req, res) => {
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
     success: true,
-    message: 'Password is updated succesfully!',
+    message: 'Password is updated successfully!',
     data: result,
   });
 });

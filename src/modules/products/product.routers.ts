@@ -1,9 +1,8 @@
-import { NextFunction, Request, Response, Router } from 'express';
+import { Router } from 'express';
 import { productControlers } from './product.controlers';
 import auth from '../../middlewares/auth';
 import validateRequest from '../../middlewares/validatedRequest';
 import { productValidation } from './product.validation.schema';
-import { upload } from '../../middlewares/imageToCloudinary';
 
 const productRouter = Router();
 

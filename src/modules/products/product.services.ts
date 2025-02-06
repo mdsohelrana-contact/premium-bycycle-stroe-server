@@ -1,4 +1,3 @@
-import { imageToCloudinary } from '../../middlewares/imageToCloudinary';
 import QueryBuilder from '../../queryBuilder/QueryBuilder';
 import { BicycleModel, IBicycle } from './product.interface';
 

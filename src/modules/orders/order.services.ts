@@ -167,7 +167,7 @@ const getOrderByUserId = async (
   userId: string,
   query: Record<string, unknown>,
 ) => {
-  const orderQuery = new QueryBuilder(OrderModel.find(), query)
+  const orderQuery = new QueryBuilder(OrderModel.find({ userId }), query)
     .filter()
     .sort()
     .paginate()

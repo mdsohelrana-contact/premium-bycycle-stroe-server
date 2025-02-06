@@ -27,6 +27,7 @@ orderRouter.put(
   auth('admin'),
   orderControlers.updateOrderConfirm,
 );
+
 orderRouter.put(
   '/order/:id/reject',
   auth('admin'),
