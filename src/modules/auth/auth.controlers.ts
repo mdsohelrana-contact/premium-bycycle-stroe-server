@@ -2,8 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 import { authServices } from './auth.services';
 import responseHandelar from '../../utils/responseHandelar';
-import AppError from '../../errors/AppError';
-import { JwtPayload } from 'jsonwebtoken';
 
 const loginUser = catchAsync(async (req, res, next) => {
   try {
@@ -25,28 +23,21 @@ const loginUser = catchAsync(async (req, res, next) => {
 });
 
 // // change password
-// const chnagePassword = catchAsync(async (req, res) => {
-//   if (!req.user) {
-//     throw new AppError(StatusCodes.UNAUTHORIZED, 'User not authenticated');
-//   }
+const chnagePassword = catchAsync(async (req, res) => {
+  const { userId } = req.params;
+  const changeInfo = req.body;
 
-//   const userData = req.user as JwtPayload;
-//   const { oldPassword, newPassword } = req.body;
+  const result = await authServices.changePassword(userId, changeInfo);
 
-//   const result = await authServices.changePassword(userData, {
-//     oldPassword,
-//     newPassword,
-//   });
-
-//   responseHandelar(res, {
-//     statusCode: StatusCodes.OK,
-//     success: true,
-//     message: 'Password is updated succesfully!',
-//     data: result,
-//   });
-// });
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Password is updated succesfully!',
+    data: result,
+  });
+});
 
 export const authControlers = {
   loginUser,
-  // chnagePassword,
+  chnagePassword,
 };

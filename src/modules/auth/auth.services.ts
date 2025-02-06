@@ -1,10 +1,10 @@
 import bcrypt from 'bcrypt';
 import { User } from '../users/user.model';
-import { TLoginInfo } from './auth.interface';
+import { TChangePassword, TLoginInfo } from './auth.interface';
 import AppError from '../../errors/AppError';
 import config from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
-import jwt, { JwtPayload } from 'jsonwebtoken';
+import jwt from 'jsonwebtoken';
 
 const loginUser = async (payload: TLoginInfo) => {
   // find user by email
@@ -51,21 +51,15 @@ const loginUser = async (payload: TLoginInfo) => {
 };
 
 // change password
-const changePassword = async (
-  userData: JwtPayload,
-  payload: {
-    oldPassword: string;
-    newPassword: string;
-  },
-) => {
-  const user = await User.findById(userData.userId);
+const changePassword = async (userId: string, payload: TChangePassword) => {
+  const user = await User.findById(userId);
 
   if (!user) {
     throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found !');
   }
 
   if (!user.isActive) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'This user is deactivated ! !');
+    throw new AppError(StatusCodes.FORBIDDEN, 'This user is deactivated!');
   }
 
   //   now check valid password
@@ -75,7 +69,7 @@ const changePassword = async (
   );
 
   if (!isPasswordMatched) {
-    throw new AppError(StatusCodes.FORBIDDEN, 'Password is mismatched ! !');
+    throw new AppError(StatusCodes.FORBIDDEN, 'Password is mismatched  !');
   }
 
   const newHashPassword = await bcrypt.hash(
@@ -85,15 +79,15 @@ const changePassword = async (
 
   await User.findOneAndUpdate(
     {
-      _id: userData.userId,
-      role: userData.role,
+      _id: user?._id,
+      role: user?.role,
     },
     {
       password: newHashPassword,
     },
   );
 
-  return null;
+  return { message: 'Password changed successfully!' };
 };
 
 export const authServices = {

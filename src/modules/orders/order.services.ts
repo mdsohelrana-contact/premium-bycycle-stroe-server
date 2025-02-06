@@ -70,20 +70,6 @@ const getTotalRevenew = async () => {
             },
           },
         ],
-
-        allOrders: [
-          {
-            $group: {
-              _id: '$_id',
-              orderDetails: { $first: '$$ROOT' },
-            },
-          },
-          {
-            $replaceRoot: {
-              newRoot: '$orderDetails',
-            },
-          },
-        ],
       },
     },
 
@@ -91,7 +77,6 @@ const getTotalRevenew = async () => {
       $project: {
         totalRevenue: { $arrayElemAt: ['$totalRevenue.totalRevenue', 0] },
         topSellingProducts: 1,
-        allOrders: 1,
       },
     },
   ]);
@@ -101,14 +86,33 @@ const getTotalRevenew = async () => {
     return {
       totalRevenue: result[0].totalRevenue || 0,
       topSellingProducts: result[0].topSellingProducts,
-      allOrders: result[0].allOrders,
     };
   }
 
   return {
     totalRevenue: 0,
     topSellingProducts: [],
-    allOrders: [],
+  };
+};
+
+// all orders
+const getAllOrders = async (query: Record<string, unknown>) => {
+  const orderQuery = new QueryBuilder(OrderModel.find(), query)
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
+  const meta = await orderQuery.countTotal();
+  const result = await orderQuery.modelQuery.populate('products.product');
+
+  if (result?.length === 0) {
+    throw new AppError(StatusCodes.NOT_FOUND, 'Order unavailable');
+  }
+
+  return {
+    meta,
+    result,
   };
 };
 
@@ -189,13 +193,28 @@ const getOrderByUserId = async (
 };
 
 // update order status
-const updateOrderStatus = async (payload: string, orderId: string) => {
+const updateOrderConfirm = async (orderId: string) => {
   const result = await OrderModel.findByIdAndUpdate(
     {
       _id: orderId,
     },
     {
-      orderIntent: payload,
+      orderIntent: 'Confirmed',
+    },
+    { new: true },
+  );
+
+  return result;
+};
+
+// update order status
+const updateOrderReject = async (orderId: string) => {
+  const result = await OrderModel.findByIdAndUpdate(
+    {
+      _id: orderId,
+    },
+    {
+      orderIntent: 'Rejected',
     },
     { new: true },
   );
@@ -232,8 +251,10 @@ const verifyPayment = async (order_id: string) => {
 
 export const orderServices = {
   getTotalRevenew,
+  getAllOrders,
   postOrderData,
   getOrderByUserId,
   verifyPayment,
-  updateOrderStatus,
+  updateOrderConfirm,
+  updateOrderReject,
 };

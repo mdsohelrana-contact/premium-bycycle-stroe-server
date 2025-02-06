@@ -27,6 +27,18 @@ const totalRevenue = catchAsync(async (req, res) => {
   });
 });
 
+// get all orders
+const allOrders = catchAsync(async (req, res) => {
+  const result = await orderServices.getAllOrders(req.query);
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order retrived successfully.',
+    data: result,
+  });
+});
+
 const getOrder = catchAsync(async (req, res) => {
   const { userId } = req.params;
 
@@ -45,11 +57,33 @@ const getOrder = catchAsync(async (req, res) => {
 });
 
 // update orderintent
-const updateOrderStatus = catchAsync(async (req, res) => {
+const updateOrderConfirm = catchAsync(async (req, res) => {
   const { id } = req.params;
-  const { status } = req.body;
 
-  const result = await orderServices.updateOrderStatus(status, id);
+  const result = await orderServices.updateOrderConfirm(id);
+
+  if (!result) {
+    responseHandelar(res, {
+      statusCode: StatusCodes.NOT_FOUND,
+      success: false,
+      message: 'Order not found!',
+      data: null,
+    });
+  }
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Order status updated successfully.',
+    data: result,
+  });
+});
+
+// update orderintent
+const updateOrderReject = catchAsync(async (req, res) => {
+  const { id } = req.params;
+
+  const result = await orderServices.updateOrderReject(id);
 
   if (!result) {
     responseHandelar(res, {
@@ -85,8 +119,10 @@ const verifyPayment = catchAsync(async (req, res) => {
 
 export const orderControlers = {
   totalRevenue,
+  allOrders,
   postOrder,
   getOrder,
   verifyPayment,
-  updateOrderStatus,
+  updateOrderConfirm,
+  updateOrderReject,
 };
