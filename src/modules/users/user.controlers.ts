@@ -3,22 +3,17 @@ import catchAsync from '../../utils/catchAsync';
 import responseHandelar from '../../utils/responseHandelar';
 import { User } from './user.model';
 import { userServices } from './user.services';
+import { Request, Response } from 'express';
+import { JwtPayload } from 'jsonwebtoken';
+
+
+interface CustomRequest extends Request {
+  user?: JwtPayload;
+}
 
 // createUser
 const createUser = catchAsync(async (req, res) => {
   const userData = req.body;
-
-  // check is user already exists
-  const isExists = await User.findOne({ email: userData.email });
-
-  if (isExists) {
-    return responseHandelar(res, {
-      statusCode: StatusCodes.CONFLICT,
-      success: false,
-      message: 'User email already exists!.',
-      data: null,
-    });
-  }
 
   const saveduserData = await userServices.createUserIntoDB(userData);
 
@@ -101,10 +96,26 @@ const updatedUserSttatus = catchAsync(async (req, res) => {
   });
 });
 
+// get my profile data
+const myProfile = catchAsync(async (req:CustomRequest, res:Response) => {
+  const user = req.user;
+
+  const result = await userServices.getMyProfileData(user);
+
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'User retrieved successfully.',
+    data: result,
+  });
+
+});
+
 // export all user controlers methods
 export const userControlers = {
   createUser,
   getAllUsers,
   singleUserData,
   updatedUserSttatus,
+  myProfile,
 };

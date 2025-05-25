@@ -7,9 +7,15 @@ import AppError from '../errors/AppError';
 import { TUserRole } from '../constant/user.role';
 import config from '../config/config';
 import { User } from '../modules/users/user.model';
+import verifyToken from '../utils/verifyToken';
+
+interface CustomRequest extends Request {
+  user?: JwtPayload;
+}
+
 
 const auth = (...userRoles: TUserRole[]) => {
-  return async (req: Request, res: Response, next: NextFunction) => {
+  return async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
 
@@ -19,53 +25,42 @@ const auth = (...userRoles: TUserRole[]) => {
         );
       }
 
-      let decoded;
-      try {
-        // checking if the given token is valid
-        decoded = jwt.verify(
-          token,
-          config.jwtAccessToken as string,
-        ) as JwtPayload;
-      } catch (err) {
-        throw new AppError(StatusCodes.UNAUTHORIZED, 'You are UNAUTHORIZED!');
+      const decoded = verifyToken(token) ;
+
+
+      const { userId, role } = decoded;
+
+      if (!userId) {
+        return next(
+          new AppError(StatusCodes.UNAUTHORIZED, 'Invalid token payload'),
+        );
       }
 
-      // Verify token
-      jwt.verify(token, `${config.jwtAccessToken}`, async (err, decoded) => {
-        if (err) {
-          return next(
-            new AppError(StatusCodes.UNAUTHORIZED, 'You are UNAUTHORIZED'),
-          );
-        }
+      const user = await User.findById(userId);
 
-        const { userId, role } = decoded as JwtPayload;
+      if (!user) {
+        return next(
+          new AppError(StatusCodes.NOT_FOUND, 'This user is not found!'),
+        );
+      }
 
-        // checking if the user is exist
-        const user = await User.findById(userId);
+      if (!user.isActive) {
+        return next(
+          new AppError(StatusCodes.UNAUTHORIZED, 'This user is not active!'),
+        );
+      }
 
-        if (!user) {
-          throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found !');
-        }
-        // checking if the user is already deleted
+      if (userRoles.length && !userRoles.includes(role)) {
+        return next(
+          new AppError(
+            StatusCodes.FORBIDDEN,
+            'You do not have permission to access this resource',
+          ),
+        );
+      }
+      req.user = decoded ;
 
-        if (!user.isActive) {
-          return next(
-            new AppError(StatusCodes.BAD_REQUEST, 'This user is deactivate  !'),
-          );
-        }
-
-        //statek user role
-        if (userRoles.length && !userRoles.includes(role as TUserRole)) {
-          return next(
-            new AppError(StatusCodes.UNAUTHORIZED, 'You are UNAUTHORIZED'),
-          );
-        }
-
-        // Attach the decoded token to the request object
-        // req.user = decoded as JwtPayload & { role: string };
-
-        next();
-      });
+      next();
     } catch (error: any) {
       next(
         new AppError(

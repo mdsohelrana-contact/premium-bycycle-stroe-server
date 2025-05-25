@@ -14,12 +14,17 @@ userRoutes.post(
 );
 
 // get all users data
-userRoutes.get('/users', auth('admin'), userControlers.getAllUsers);
+userRoutes.get('/users', auth('admin'), userControlers.getAllUsers)
+
+// get my profile data
+userRoutes.get('/users/me', auth('customer',), userControlers.myProfile);
 
 // get single user data
 userRoutes.get('/users/:id', auth('admin'), userControlers.singleUserData);
 
 //   user status updated
 userRoutes.patch('/users/:id', auth('admin'), userControlers.singleUserData);
+
+
 
 export default userRoutes;

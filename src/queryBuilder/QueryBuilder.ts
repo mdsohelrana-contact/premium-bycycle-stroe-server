@@ -35,8 +35,25 @@ class QueryBuilder<T> {
 
     excludeFields.forEach((el) => delete queryObj[el]);
 
-    this.modelQuery = this.modelQuery.find(queryObj as FilterQuery<T>);
+    const fieldMap: Record<string, string> = {
+      brand: 'basicInfo.brand',
+      category: 'basicInfo.category',
+      status: 'basicInfo.status',
+      featured: 'basicInfo.featured',
+      createdAt: 'createdAt',
+      inStock: 'inStock',
+      price: 'basicInfo.price',
+    };
 
+    const mongoFilter: Record<string, unknown> = {};
+
+    Object.keys(queryObj).forEach((key) => {
+      const value = queryObj[key];
+      const mappedKey = fieldMap[key] || key; // fallback to original
+      mongoFilter[mappedKey] = value;
+    });
+
+    this.modelQuery = this.modelQuery.find(mongoFilter as FilterQuery<T>);
     return this;
   }
 

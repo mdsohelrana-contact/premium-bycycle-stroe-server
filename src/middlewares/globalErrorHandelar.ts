@@ -1,66 +1,30 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-/* eslint-disable @typescript-eslint/no-explicit-any */
+import { NextFunction, Request, Response } from "express";
+import { StatusCodes } from "http-status-codes";
 
-import { ErrorRequestHandler, NextFunction, Request, Response } from 'express';
-import { TErrorSources } from '../interfaces/error';
-import handaleZodError from '../errors/handaleZodError';
-import handaleValidationError from '../errors/handaleValidationError';
-import { ZodError } from 'zod';
-import AppError from '../errors/AppError';
-import config from '../config/config';
+// //! Define error interface
+interface IError extends Error {
+  statusCode: number;
+  stack: string;
+}
 
 // //! Define global error
-const globalErrorHandlar: ErrorRequestHandler = (
-  err: any,
+const globalErrorHandler = (
+  err: unknown,
   req: Request,
   res: Response,
-  next: NextFunction,
+  next: NextFunction
 ) => {
-  let statusCode = 500;
-  let message = 'Something went wrong!';
-  let errorSources: TErrorSources = [
-    {
-      path: '',
-      message: 'Something went wrong',
-    },
-  ];
-
-  if (err instanceof ZodError) {
-    const fieldError = handaleZodError(err);
-    statusCode = fieldError?.statusCode;
-    message = fieldError?.message;
-    errorSources = fieldError?.errorSources;
-  } else if (err?.name === 'ValidationError') {
-    const fieldError = handaleValidationError(err);
-    statusCode = fieldError?.statusCode;
-    message = fieldError?.message;
-    errorSources = fieldError?.errorSources;
-  } else if (err instanceof AppError) {
-    statusCode = err?.statusCode;
-    message = err.message;
-    errorSources = [
-      {
-        path: '',
-        message: err?.message,
-      },
-    ];
-  } else if (err instanceof Error) {
-    message = err.message;
-    errorSources = [
-      {
-        path: '',
-        message: err?.message,
-      },
-    ];
-  }
+  const error = err as IError;
+  const statusCode = error.statusCode || StatusCodes.INTERNAL_SERVER_ERROR;
 
   res.status(statusCode).json({
     success: false,
-    message,
-    errorSources,
-    err,
-    stack: config.nodeEnv === 'development' ? err?.stack : null,
+    status: error.statusCode,
+    message: error.message || "Something went wrong",
+    stack: process.env.NODE_ENV === "DEVELOPMENT" ? error.stack : undefined,
   });
+
+  next();
 };
 
-export default globalErrorHandlar;
+export default globalErrorHandler;

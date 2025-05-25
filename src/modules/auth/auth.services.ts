@@ -5,6 +5,7 @@ import config from '../../config/config';
 import { StatusCodes } from 'http-status-codes';
 import jwt from 'jsonwebtoken';
 import AppError from '../../errors/AppError';
+import { checkExistUser } from '../../utils/checkUserRole';
 
 const loginUser = async (payload: TLoginInfo) => {
   // find user by email
@@ -51,14 +52,11 @@ const loginUser = async (payload: TLoginInfo) => {
 };
 
 // change password
-const changePassword = async (userId: string, payload: TChangePassword) => {
-  const user = await User.findById(userId);
+const changePassword = async (user: any, payload: TChangePassword) => {
+  const userData = await checkExistUser(user.UserEmail);
 
-  if (!user) {
-    throw new AppError(StatusCodes.NOT_FOUND, 'This user is not found !');
-  }
 
-  if (!user.isActive) {
+  if (!userData.isActive) {
     throw new AppError(StatusCodes.FORBIDDEN, 'This user is deactivated!');
   }
 

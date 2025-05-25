@@ -1,8 +1,13 @@
 import { productServices } from './product.services';
-import { IBicycle } from './product.interface';
 import catchAsync from '../../utils/catchAsync';
 import responseHandelar from '../../utils/responseHandelar';
 import { StatusCodes } from 'http-status-codes';
+import { JwtPayload } from 'jsonwebtoken';
+import { Request } from 'express';
+
+interface CustomRequest extends Request {
+  user?: JwtPayload;
+}
 
 // allProducts use productServices.postProductData
 const allProducts = catchAsync(async (req, res) => {
@@ -42,12 +47,11 @@ const singleData = catchAsync(async (req, res) => {
 });
 
 // postProduct Data use productServices.postProductData
-const postProduct = catchAsync(async (req, res) => {
+const postProduct = catchAsync(async (req: CustomRequest, res) => {
   const productData = req.body;
+  const user = req.user as any;
 
-  // console.log(req?.file, productData);
-
-  const result = await productServices.postProductData(productData);
+  const result = await productServices.postProductData(productData, user!);
 
   responseHandelar(res, {
     statusCode: StatusCodes.CREATED,
@@ -58,40 +62,15 @@ const postProduct = catchAsync(async (req, res) => {
 });
 
 // updateProduct
-const updateProduct = catchAsync(async (req, res) => {
+const updateProduct = catchAsync(async (req: CustomRequest, res) => {
   const { productId } = req.params;
-  const {
-    name,
-    brand,
-    price,
-    type,
-    imageUrl,
-    description,
-    quantity,
-    rating,
-    inStock,
-  }: IBicycle = req.body;
+  const user = req.user;
 
-  const result = await productServices.updateProductData(productId, {
-    name,
-    brand,
-    price,
-    type,
-    imageUrl,
-    description,
-    quantity,
-    rating,
-    inStock,
-  });
-
-  if (!result) {
-    responseHandelar(res, {
-      statusCode: StatusCodes.NOT_FOUND,
-      success: false,
-      message: 'Bicycle not found!!.',
-      data: null,
-    });
-  }
+  const result = await productServices.updateProductData(
+    productId,
+    req.body,
+    user!,
+  );
 
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
@@ -102,19 +81,26 @@ const updateProduct = catchAsync(async (req, res) => {
 });
 
 // deleteSingleProduct By ID
-const deleteSingleProduct = catchAsync(async (req, res) => {
+const deleteSingleProduct = catchAsync(async (req: CustomRequest, res) => {
   const { productId } = req.params;
+  const user = req.user;
 
-  const result = await productServices.deleteProduct(productId);
+  await productServices.deleteProduct(productId, user!);
 
-  if (!result) {
-    responseHandelar(res, {
-      statusCode: StatusCodes.NOT_FOUND,
-      success: false,
-      message: 'Bicycle not found!!.',
-      data: null,
-    });
-  }
+  responseHandelar(res, {
+    statusCode: StatusCodes.OK,
+    success: true,
+    message: 'Bicycle deleted successfully.',
+    data: {},
+  });
+});
+
+// soft deleteSingleProduct By ID
+const softDeleteSingleProduct = catchAsync(async (req: CustomRequest, res) => {
+  const { productId } = req.params;
+  const user = req.user;
+
+  await productServices.softDeleteProduct(productId, user!);
 
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
@@ -130,4 +116,5 @@ export const productControlers = {
   postProduct,
   updateProduct,
   deleteSingleProduct,
+  softDeleteSingleProduct,
 };

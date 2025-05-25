@@ -1,10 +1,24 @@
+import { StatusCodes } from 'http-status-codes';
+import AppError from '../../errors/AppError';
 import QueryBuilder from '../../queryBuilder/QueryBuilder';
 import { TUser } from './user.interface';
 import { User } from './user.model';
 
 // createUserIntoDB
 const createUserIntoDB = async (payload: TUser) => {
+
+  console.log(payload)
+
+  // check if user already exists
+  const isExists = await User.findOne({ email: payload.email });
+
+  if (isExists) {
+    throw new AppError(StatusCodes.CONFLICT,'User already exists');
+  }
+
   const result = await User.create(payload);
+
+
   return result;
 };
 
@@ -34,6 +48,13 @@ const getSingleUser = async (productId: string) => {
   return product;
 };
 
+// get my profile data
+const getMyProfileData = async (user: any) => {
+
+  const userData = await User.findOne({ _id: user?.userId })
+  return userData;
+};
+
 // update user status
 const updatedUserStatus = async (userId: string) => {
   const user = await User.findOneAndUpdate(
@@ -53,4 +74,5 @@ export const userServices = {
   getUsersFromDB,
   getSingleUser,
   updatedUserStatus,
+  getMyProfileData
 };

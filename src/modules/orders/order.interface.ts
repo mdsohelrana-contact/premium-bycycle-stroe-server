@@ -109,22 +109,22 @@ orderSchema.pre('save', async function (next) {
       }
 
       // Check if enough stock is available
-      if (bicycle.quantity < quantity) {
+      if (bicycle.basicInfo.quantity < quantity) {
         return next(
           new Error(
-            `Insufficient stock for product: ${bicycle.name}. Available: ${bicycle.quantity}, requested: ${quantity}.`,
+            `Insufficient stock for product: ${bicycle.basicInfo.name}. Available: ${bicycle.basicInfo.quantity}, requested: ${quantity}.`,
           ),
         );
       }
 
       // calculatePrice
-      totalPrice += bicycle.price * quantity;
+      totalPrice += bicycle.basicInfo.price * quantity;
 
       // Update the product quantity
-      bicycle.quantity -= quantity;
+      bicycle.basicInfo.quantity -= quantity;
 
       // Update the inStock
-      if (bicycle.quantity === 0) {
+      if (bicycle.basicInfo.quantity === 0) {
         bicycle.inStock = false;
       }
 

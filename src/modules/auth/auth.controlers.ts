@@ -2,6 +2,13 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 import { authServices } from './auth.services';
 import responseHandelar from '../../utils/responseHandelar';
+import config from '../../config/config';
+import { JwtPayload } from 'jsonwebtoken';
+import { Request } from 'express';
+
+interface CustomRequest extends Request {
+  user?: JwtPayload;
+}
 
 const loginUser = catchAsync(async (req, res, next) => {
   try {
@@ -10,6 +17,12 @@ const loginUser = catchAsync(async (req, res, next) => {
     const accessToken = {
       accessToken: token,
     };
+
+    res.cookie('accessToken', accessToken, {
+      secure: config.nodeEnv === 'production',
+      httpOnly: true,
+      sameSite: 'strict',
+    });
 
     responseHandelar(res, {
       statusCode: StatusCodes.OK,
@@ -23,11 +36,11 @@ const loginUser = catchAsync(async (req, res, next) => {
 });
 
 // // change password
-const chnagePassword = catchAsync(async (req, res) => {
-  const { userId } = req.params;
+const chnagePassword = catchAsync(async (req: CustomRequest, res) => {
   const changeInfo = req.body;
+  const user = req.user;
 
-  const result = await authServices.changePassword(userId, changeInfo);
+  const result = await authServices.changePassword(user, changeInfo);
 
   responseHandelar(res, {
     statusCode: StatusCodes.OK,
