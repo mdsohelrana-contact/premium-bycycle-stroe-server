@@ -2,7 +2,6 @@ import { StatusCodes } from 'http-status-codes';
 import catchAsync from '../../utils/catchAsync';
 import { authServices } from './auth.services';
 import responseHandelar from '../../utils/responseHandelar';
-import config from '../../config/config';
 import { JwtPayload } from 'jsonwebtoken';
 import { Request } from 'express';
 
@@ -14,21 +13,17 @@ const loginUser = catchAsync(async (req, res, next) => {
   try {
     const { token } = await authServices.loginUser(req.body);
 
-    const accessToken = {
-      accessToken: token,
-    };
-
-    res.cookie('accessToken', accessToken, {
-      secure: config.nodeEnv === 'production',
-      httpOnly: true,
-      sameSite: 'strict',
-    });
+    // res.cookie('accessToken', token, {
+    //   secure: config.nodeEnv === 'production',
+    //   httpOnly: true,
+    //   sameSite: 'strict',
+    // });
 
     responseHandelar(res, {
       statusCode: StatusCodes.OK,
       success: true,
       message: 'Login Successful.',
-      data: accessToken,
+      data: { accessToken: token },
     });
   } catch (error) {
     next(error);

@@ -18,6 +18,7 @@ const auth = (...userRoles: TUserRole[]) => {
   return async (req: CustomRequest, res: Response, next: NextFunction) => {
     try {
       const token = req.headers.authorization;
+      // const token = req.cookies?.accessToken;
 
       if (!token) {
         return next(

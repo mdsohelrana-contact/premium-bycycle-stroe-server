@@ -7,16 +7,18 @@ import userRoutes from './modules/users/user.routes';
 import authRouter from './modules/auth/auth.routes';
 import globalErrorHandler from './middlewares/globalErrorHandelar';
 import { dashboardRoutes } from './modules/Dashboard/dashboard.routes';
+import cookieParser from 'cookie-parser';
 
 const app: Application = express();
 
 app.use(cors());
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
 app.use(
   cors({
-    origin: 'https://bycicle-store-client-site.vercel.app',
+    origin: 'http://localhost:5173',
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization'],
     credentials: true,
